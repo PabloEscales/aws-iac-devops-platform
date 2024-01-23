@@ -70,7 +70,7 @@ resource "aws_iam_policy" "policy_admin" {
 
 resource "aws_iam_role" "test_role" {
   name = "poel-terraform-ec2"
-  managed_policy_arns = [ aws_iam_policy.policy_admin ]
+  managed_policy_arns = aws_iam_policy.policy_admin.arn
 
   # Terraform's "jsonencode" function converts a
   # Terraform expression result to valid JSON syntax.
