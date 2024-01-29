@@ -6,6 +6,11 @@ terraform {
       source = "hashicorp/aws"
       version = "5.32.1"
     }
+
+    helm = {
+      source  = "hashicorp/helm"
+      version = "2.12.1"
+    }
   }
 }
 
@@ -70,7 +75,7 @@ resource "aws_iam_policy" "policy_admin" {
 
 resource "aws_iam_role" "test_role" {
   name = "poel-terraform-ec2"
-  managed_policy_arns = aws_iam_policy.policy_admin.arn
+  managed_policy_arns = [aws_iam_policy.policy_admin.arn]
 
   # Terraform's "jsonencode" function converts a
   # Terraform expression result to valid JSON syntax.
@@ -94,12 +99,13 @@ resource "aws_iam_instance_profile" "test_profile" {
 }
 
 resource "aws_instance" "ec2" {
-  ami                    = "ami-0e5f882be1900e43b"
+  ami                    = "ami-0179c94e8356a69c3"
   instance_type          = "t2.micro"
   subnet_id              = aws_subnet.subnet.id
   key_name               = aws_key_pair.key_pair.key_name
   associate_public_ip_address = true
   vpc_security_group_ids = [aws_security_group.security-group.id]
+  iam_instance_profile = aws_iam_instance_profile.test_profile.name
 
   tags = {
     Name = var.instance_name
@@ -133,16 +139,9 @@ resource "aws_security_group" "security-group" {
   }
 
   egress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 443
-    to_port     = 443
-    protocol    = "tcp"
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
